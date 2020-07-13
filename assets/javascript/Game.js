@@ -15,25 +15,35 @@ class Game {
   }
 
   generate() {
+    // new Modal("test", "test");
     this.element = document.createElement("main");
     this.element.classList.add("game");
+
     this.topDiv = document.createElement("div");
     this.topDiv.classList.add("top");
+    this.element.append(this.topDiv);
+
     this.timerDiv = document.createElement("div");
+    this.timerDiv.append("⏱️ ");
     this.time = document.createElement("span");
-    this.timerDiv.append(this.secs);
-    this.topDiv.append(this.timerDiv);
+    this.time.append(this.secs);
+    this.timerDiv.append(this.time);
+
     this.faceDiv = document.createElement("div");
     this.faceDiv.innerHTML = "🙂";
-    this.topDiv.append(this.faceDiv);
-    this.mineCount = document.createElement("div");
+
+    this.minecountDiv = document.createElement("div");
+    this.minecountDiv.append("💣 ");
+    this.mineCount = document.createElement("span");
     this.mineCount.append(this.numMines);
-    this.topDiv.append(this.mineCount);
-    this.parent.append(this.topDiv);
-    this.parent.append(this.element);
-    console.log(this.numMines);
+    this.minecountDiv.append(this.mineCount);
+
+    this.topDiv.append(this.timerDiv, this.faceDiv, this.minecountDiv);
+
     this.board = new Board(20, 40, this.numMines);
     this.element.append(this.board.element);
+    this.parent.append(this.element);
+
     this.board.element.addEventListener("mousedown", (e) => this.boardClick(e));
     this.board.element.addEventListener("click", (e) =>
       setTimeout(this.releaseClick(e), 1000)
@@ -54,10 +64,35 @@ class Game {
     if (this.board.gameWin) {
       this.won = true;
       this.startTimer = false;
-    }
-    if (this.board.gameLost) {
+      let winModal = new Modal("You won!");
+      if (this.secs < this.bestTime) {
+        this.bestTime = this.secs;
+        let p = document.createElement("p");
+        p.append(
+          `New best time of ${this.bestTime} second${
+            this.bestTime > 1 ? "s" : ""
+          }!`
+        );
+        winModal.addElement(p);
+      }
+      let newGameButton = new Button("Start New Game");
+      newGameButton.addClickHandler((e) => {
+        document.querySelector("main").remove();
+        new Game();
+        winModal.element.remove();
+      });
+      winModal.addElement(newGameButton.element);
+    } else if (this.board.gameLost) {
       this.lost = true;
       this.startTimer = false;
+      let deathModal = new Modal("You died");
+      let newGameButton = new Button("Start New Game");
+      newGameButton.addClickHandler((e) => {
+        document.querySelector("main").remove();
+        new Game();
+        deathModal.element.remove();
+      });
+      deathModal.addElement(newGameButton.element);
     }
   }
 
@@ -85,7 +120,7 @@ class Game {
   addSecond() {
     if (this.startTimer) {
       this.secs++;
-      this.timerDiv.innerHTML = this.secs;
+      this.time.innerHTML = this.secs;
       setTimeout(() => this.addSecond(), 1000);
     }
   }
