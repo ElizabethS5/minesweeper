@@ -70,23 +70,36 @@ class Tile {
     this.checkNeighborTile(+1, 0);
   }
 
+  chainExplosions() {
+    this.board.tiles
+      .flat(1)
+      .filter((tile) => tile.hasMine)
+      .forEach((tile) => {
+        tile.element.classList.add("clicked");
+        tile.show = true;
+        tile.element.innerText = "💥";
+      });
+  }
+
   clickTile() {
-    if (this.show || this.board.gameOver || this.marked) {
+    if (this.show || this.gameOver || this.marked) {
       return;
     }
     this.element.classList.add("clicked");
     this.show = true;
+    this.findAdjacentMines();
     if (this.hasMine) {
       this.element.innerText = "💣";
-      this.board.tiles.forEach((row) =>
-        row.forEach((tile) => tile.clickTile())
-      );
+      setTimeout(() => {
+        this.element.innerText = "💥";
+        this.chainExplosions();
+      }, 500);
+
       this.board.gameOver = true;
       this.board.gameLost = true;
       return;
     }
     this.board.clearedTiles++;
-    this.findAdjacentMines();
     if (!this.adjacentMines) {
       this.adjacentTiles.forEach((tile) => tile.clickTile());
     } else {
