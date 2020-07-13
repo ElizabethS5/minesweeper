@@ -20,6 +20,7 @@ class Game {
     this.topDiv = document.createElement("div");
     this.topDiv.classList.add("top");
     this.timerDiv = document.createElement("div");
+    this.time = document.createElement("span");
     this.timerDiv.append(this.secs);
     this.topDiv.append(this.timerDiv);
     this.faceDiv = document.createElement("div");
